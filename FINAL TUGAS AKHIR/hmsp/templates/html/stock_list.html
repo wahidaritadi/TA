@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Saham HMSP</title>
+</head>
+<body>
+    <h1>Data Saham HMSP</h1>
+    <p>Total Data Saham: {{ stock_count }}</p>  <!-- Menampilkan jumlah data -->
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Open</th>
+                <th>High</th>
+                <th>Low</th>
+                <th>Close</th>
+                <th>Volume</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in stocks %}
+            <tr>
+                <td>{{ stock.date }}</td>
+                <td>{{ stock.open_price }}</td>
+                <td>{{ stock.high_price }}</td>
+                <td>{{ stock.low_price }}</td>
+                <td>{{ stock.close_price }}</td>
+                <td>{{ stock.volume }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
