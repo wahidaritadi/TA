@@ -1,0 +1,133 @@
+{% comment %} <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Saham HMSP</title>
+  </head>
+  <body>
+    <h1>Data Saham HMSP</h1>
+    <p>Total Data Saham: {{ stock_count }}</p> <!-- Menampilkan jumlah data -->
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Open</th>
+          <th>High</th>
+          <th>Low</th>
+          <th>Close</th>
+          <th>Volume</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for stock in stocks %}
+          <tr>
+            <td>{{ stock.date }}</td>
+            <td>{{ stock.open_price }}</td>
+            <td>{{ stock.high_price }}</td>
+            <td>{{ stock.low_price }}</td>
+            <td>{{ stock.close_price }}</td>
+            <td>{{ stock.volume }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </body>
+</html> {% endcomment %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Saham HMSP</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="text-center">Data Saham HMSP</h1>
+      <div class="row">
+        <div class="col-sm-6" style="text-align: left;">
+          <p>Total Data Saham: {{ stock_count }}</p> <!-- Menampilkan jumlah data -->
+        </div>
+        <div class="col-sm-6" style="text-align: right;">
+          <a name="" id="" class="btn btn-primary" href="{% url 'home' %}" role="button">Home</a>
+          <a name="" id="" class="btn btn-primary" href="#" role="button">View Graf</a>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+          <thead class="thead-dark">
+            <tr>
+              <th>No</th>
+              <th>Date</th>
+              <th>Open</th>
+              <th>High</th>
+              <th>Low</th>
+              <th>Close</th>
+              <th>Volume</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for stock in page_obj %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ stock.date }}</td>
+                <td>{{ stock.open_price }}</td>
+                <td>{{ stock.high_price }}</td>
+                <td>{{ stock.low_price }}</td>
+                <td>{{ stock.close_price }}</td>
+                <td>{{ stock.volume }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <!-- Pagination -->
+      <nav>
+        <ul class="pagination justify-content-center">
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page=1">&laquo; First</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <span class="page-link">&laquo; First</span>
+            </li>
+            <li class="page-item disabled">
+              <span class="page-link">Previous</span>
+            </li>
+          {% endif %}
+
+          <li class="page-item active">
+            <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+          </li>
+
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <span class="page-link">Next</span>
+            </li>
+            <li class="page-item disabled">
+              <span class="page-link">Last &raquo;</span>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>
