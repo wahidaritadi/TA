@@ -6,5 +6,5 @@ class HmspConfig(AppConfig):
     name = 'hmsp'
 
     def ready(self):
-        from .views import fetch_and_save_stock_data
+        from .proses_data import fetch_and_save_stock_data
         fetch_and_save_stock_data()

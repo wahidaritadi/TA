@@ -92,6 +92,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" onclick="downloadChart('stockChart', 'stock_chart')">Download Chart</button>
                 </div>
             </div>
         </div>
@@ -100,21 +101,25 @@
     <!-- Modal for Prediction Chart -->
     <div class="modal fade" id="predictionChartModal" tabindex="-1" role="dialog" aria-labelledby="predictionChartModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="predictionChartModalLabel">Prediction Chart</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <canvas id="predictionChart" width="800" height="400"></canvas>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="predictionChartModalLabel">Prediction</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
             </div>
+            <div class="modal-body">
+              <p>Tanggal Prediksi: <strong>{{ predicted_dates }}</strong>
+              </p>
+              <p>Nilai Close Price Prediksi: <strong>{{ predicted_close_prices }}</strong>
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 
     <!-- Bootstrap JS and dependencies -->
@@ -175,6 +180,31 @@
                 }
             }
         });
+
+        // Function to download chart 
+        function downloadChart(chartId, chartName) {
+            var canvas = document.getElementById(chartId);
+            var originalWidth = canvas.width;
+            var originalHeight = canvas.height;
+            // Set the canvas size to 1920x1080 for high-resolution download
+            canvas.width = 1920;
+            canvas.height = 1080;
+            
+            var ctx = canvas.getContext('2d');
+            var chartInstance = Chart.getChart(chartId);
+            chartInstance.resize();
+            chartInstance.update();
+            
+            var link = document.createElement('a');
+            link.download = chartName + '.jpg';
+            link.href = canvas.toDataURL('image/jpeg', 1.0);
+            link.click();
+            
+            canvas.width = originalWidth;
+            canvas.height = originalHeight;
+            chartInstance.resize();
+            chartInstance.update();
+        }
     </script>
 </body>
 </html>
