@@ -1,8 +1,9 @@
 
 from django.urls import path
-from .views import callStock_list , home
+from .views import callStock_list , home , predictData
 
 urlpatterns = [
-    path('', callStock_list, name='hmsp'),
-    path('home/', home, name='home'),
+    path('', home, name='home'),
+    path('DataHMSP', callStock_list, name='hmsp'),
+    path('PrediksiNilaiHSMP', predictData, name='PrediksiNilaiHSMP'),
 ]

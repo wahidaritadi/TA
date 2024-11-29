@@ -5,5 +5,8 @@ def callStock_list(request):
     return stock_list(request)
 
 def home(request):
-    return render(request, 'home/home.html')
+    return render(request, 'html/home.html')
+
+def predictData(request):
+    return render(request, 'html/predictionStockPrice.html')
 

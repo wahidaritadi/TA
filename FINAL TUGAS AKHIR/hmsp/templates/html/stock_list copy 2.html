@@ -6,8 +6,8 @@
     <title>Data Saham HMSP</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <!-- Font Awesome 4 -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    {% comment %} style {% endcomment %}
     <style> 
         body { display: flex; min-height: 100vh; margin: 0; } 
         .sidebar { width: 250px; background-color: #343a40; color: white; padding: 15px; } 
@@ -17,7 +17,6 @@
     </style>
 </head>
 <body>
-    <!-- navbar -->
     <div class="d-flex flex-column flex-shrink-0 p-3 bg-dark text-white sidebar">
         <h2>RFP</h2>
         <ul class="nav nav-pills flex-column mb-auto">
@@ -25,11 +24,14 @@
                 <a href="{% url 'home' %}" class="nav-link text-white"><i class="fa fa-home" aria-hidden="true"></i> Home</a>
             </li>
             <li class="nav-item">
-                <a href="{% url 'hmsp' %}" class="nav-link text-white"><i class="fa fa-line-chart" aria-hidden="true"></i> HMSP</a>
+                <a href="{% url 'hmsp' %}" class="nav-link text-white">HMSP</a>
             </li>
             <li class="nav-item">
-                <a href="page3.html" class="nav-link text-white"><i class="fa fa-lightbulb-o" aria-hidden="true"></i> Prediksi Nilai</a>
+                <a href="page3.html" class="nav-link text-white">Page 3</a>
             </li>
+            {% comment %} <li class="nav-item">
+                <a href="page4.html" class="nav-link text-white">Page 4</a>
+            </li> {% endcomment %}
         </ul>
     </div>
     <div class="main-content bg-light">
@@ -149,6 +151,32 @@
                 }
             }
         });
+{% comment %} 
+        var ctx2 = document.getElementById('predictionChart').getContext('2d');
+        var predictedDates = {{ predicted_dates|safe }};
+        var predictedClosePrices = {{ predicted_close_prices|safe }};
+        var predictionChart = new Chart(ctx2, {
+            type: 'line',
+            data: {
+                labels: predictedDates,
+                datasets: [{
+                    label: 'Predicted Close Price',
+                    data: predictedClosePrices,
+                    backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                    borderColor: 'rgba(255, 193, 7, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        }); {% endcomment %}
 
         // Function to download chart 
         function downloadChart(chartId, chartName) {
