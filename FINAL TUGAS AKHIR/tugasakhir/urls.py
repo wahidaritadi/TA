@@ -17,11 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from . import view
+# from hmsp.urls import urls
+from hmsp.views import callStock_list , home , predictStockPrice
 
 urlpatterns = [
-    path('', view.home),
-    path('admin/', admin.site.urls),
-    path('hmsp/', include('hmsp.urls')),
-    path('home/', include('hmsp.urls')),
-
+    # path('', include('hmsp.urls')),
+    # path('admin/', admin.site.urls),9
+    path('', home, name='home'),
+    path('DataHMSP', callStock_list, name='hmsp'),
+    path('PrediksiNilaiHSMP', predictStockPrice, name='PrediksiNilaiHSMP'),
 ]
