@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from . import view
 # from hmsp.urls import urls
-from hmsp.views import callStock_list , home , predictStockPrice
+from hmsp.views import callStock_list , home , predictStockPrice, history, historyDetail
 
 urlpatterns = [
     # path('', include('hmsp.urls')),
@@ -26,4 +26,6 @@ urlpatterns = [
     path('', home, name='home'),
     path('DataHMSP', callStock_list, name='hmsp'),
     path('PrediksiNilaiHSMP', predictStockPrice, name='PrediksiNilaiHSMP'),
+    path('HistoryPrediction', history, name='riwayat'),
+    path('HistoryPredictionDetail/<int:predictionRef>', historyDetail, name='detailRiwayat'),
 ]

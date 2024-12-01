@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predict Stock Price HMSP</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Font Awesome 4 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- HTML2Canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.0.0-rc.7/html2canvas.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            padding: 15px;
+        }
+        .sidebar a {
+            display: block;
+            color: white;
+            padding: 10px;
+            text-decoration: none;
+        }
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- navbar -->
+    <div class="d-flex flex-column flex-shrink-0 p-3 bg-dark text-white sidebar">
+        <h2>RFP</h2>
+        <ul class="nav nav-pills flex-column mb-auto">
+            <li class="nav-item">
+                <a href="{% url 'home' %}" class="nav-link text-white"><i class="fa fa-home" aria-hidden="true"></i> Home</a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'hmsp' %}" class="nav-link text-white"><i class="fa fa-line-chart" aria-hidden="true"></i> HMSP</a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'PrediksiNilaiHSMP' %}" class="nav-link text-white"><i class="fa fa-lightbulb-o" aria-hidden="true"></i> Prediksi Nilai</a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'riwayat' %}" class="nav-link text-white"><i class="fa fa-history" aria-hidden="true"></i> Riwayat Prediksi</a>
+            </li>
+        </ul>
+    </div>
+    <div class="main-content bg-light">
+        <div class="container mt-5">
+            <h1 class="text-center">Predict Stock Price HMSP</h1>
+            <form method="POST" action="{% url 'PrediksiNilaiHSMP' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="start_date">Start Date</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_date">End Date</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Predict</button>
+            </form>
+            {% if dates and predictions %}
+            <div class="mt-5">
+                <h3>Model Evaluation</h3>
+                <p>Mean Squared Error (MSE): {{ mse }}</p>
+                <p>Root Mean Squared Error (RMSE): {{ rmse }}</p>
+                <p>R-squared (R²): {{ r2 }} %</p>
+                <p>Accuracy: {{ accuracy }} %</p>
+            </div> 
+            <div class="mt-5"> 
+                <h3>Prediction Results</h3> 
+                <canvas id="predictionChart" width="800" height="400"></canvas> 
+            </div>
+            <div class="mt-5 text-center">
+                <div class="row">
+                    <div class="col-sm-6" style="text-align:left;">
+                      <h3>Prediction Data</h3>
+                    </div>
+                    <div class="col-sm-6" style="text-align:right;">
+                      <button class="btn btn-success" onclick="exportToCSV()">Export to CSV</button>
+                      <button class="btn btn-success" onclick="exportToExcel()">Export to Excel</button>
+                    </div>
+                </div>
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Date</th>
+                        <th>Predicted Close Price</th>
+                    </tr>
+                    </thead>
+                    <tbody id="predictionTableBody">
+                    <!-- Rows akan ditambahkan di sini oleh JavaScript -->
+                    </tbody>
+                </table>
+                <nav>
+                    <ul class="pagination justify-content-center" id="pagination">
+                        <!-- Pagination buttons will be added here by JavaScript -->
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart Rendering Logic -->
+    {% if dates and predictions %}
+    <script>
+        var dates = {{ dates|safe }};
+        var predictions = {{ predictions|safe }};
+        var currentPage = 1;
+        var rowsPerPage = 10;
+
+        function renderTablePage(page) {
+            var start = (page - 1) * rowsPerPage;
+            var end = start + rowsPerPage;
+            var paginatedDates = dates.slice(start, end);
+            var paginatedPredictions = predictions.slice(start, end);
+            var tableBody = document.getElementById('predictionTableBody');
+            tableBody.innerHTML = '';
+            for (var i = 0; i < paginatedDates.length; i++) {
+                var row = tableBody.insertRow();
+                var cell0 = row.insertCell(0);
+                var cell1 = row.insertCell(1);
+                var cell2 = row.insertCell(2);
+                cell0.innerHTML = start + i + 1;
+                cell1.innerHTML = paginatedDates[i];
+                cell2.innerHTML = paginatedPredictions[i];
+            }
+        }
+        
+        function setupPagination() {
+            var pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            var pageCount = Math.ceil(dates.length / rowsPerPage);
+            var createPageItem = function(text, disabled, page) {
+                var li = document.createElement('li');
+                li.className = 'page-item ' + (disabled ? 'disabled' : '');
+                var a = document.createElement('a');
+                a.className = 'page-link';
+                a.innerText = text;
+                if (!disabled) {
+                    a.href = '#';
+                    a.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        currentPage = page;
+                        renderTablePage(currentPage);
+                        setupPagination();
+                    });
+                }
+                li.appendChild(a);
+                return li;
+            };
+            pagination.appendChild(createPageItem('« First', currentPage === 1, 1));
+            pagination.appendChild(createPageItem('Previous', currentPage === 1, currentPage - 1));
+            var pageItem = document.createElement('li');
+            pageItem.className = 'page-item active';
+            var span = document.createElement('span');
+            span.className = 'page-link';
+            span.innerText = 'Page ' + currentPage + ' of ' + pageCount;
+            pageItem.appendChild(span);
+            pagination.appendChild(pageItem);
+            pagination.appendChild(createPageItem('Next', currentPage === pageCount, currentPage + 1));
+            pagination.appendChild(createPageItem('Last »', currentPage === pageCount, pageCount));
+        }
+        renderTablePage(currentPage);
+        setupPagination();
+
+        var ctx = document.getElementById('predictionChart').getContext('2d');
+        var predictionChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Predicted Close Price',
+                    data: predictions,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    
+                    y: {
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+
+        function exportToCSV() {
+            var csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "No,Date,Predicted Close Price\n";
+            for (var i = 0; i < dates.length; i++) {
+                var row = (i + 1) + "," + dates[i] + "," + predictions[i] + "\n";
+                csvContent += row;
+            }
+            var encodedUri = encodeURI(csvContent);
+            var link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "prediction_data.csv");
+            document.body.appendChild(link); // Required for FF
+            link.click();
+        }
+        
+        function exportToExcel() {
+            var wb = XLSX.utils.book_new();
+            var ws_data = [
+                ['No', 'Date', 'Predicted Close Price']
+            ];
+            for (var i = 0; i < dates.length; i++) {
+                ws_data.push([(i + 1), dates[i], predictions[i]]);
+            }
+            var ws = XLSX.utils.aoa_to_sheet(ws_data);
+            XLSX.utils.book_append_sheet(wb, ws, 'Predictions');
+            XLSX.writeFile(wb, 'prediction_data.xlsx');
+        }
+
+        // Function to download chart 
+        function downloadChart(chartId, chartName) {
+            var canvas = document.getElementById(chartId);
+            html2canvas(canvas).then(function(canvas) {
+                var link = document.createElement('a');
+                link.download = chartName + '.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 1.0);
+                link.click();
+            });
+        }
+    </script>
+    {% endif %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+</body>
+</html>
+
+

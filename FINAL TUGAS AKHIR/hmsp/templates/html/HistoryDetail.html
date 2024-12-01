@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Detail</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Prediction Detail</h1>
+        <a href="{% url 'riwayat' %}" class="btn btn-primary">Back to History</a>
+            <div class="mt-5"> 
+                <h3>Prediction Results</h3> 
+            </div>
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th>Predicted Close Price</th>
+                </tr>
+            </thead>
+            <tbody id="predictionDetailTableBody">
+                {% for prediction in predictions %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ prediction.date }}</td>
+                    <td>{{ prediction.predicted_close_price }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3">No predictions available for this reference.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <nav> 
+            <ul class="pagination justify-content-center" id="paginationDetail"></ul> 
+        </nav>
+        <div class="mt-5"> 
+            <h3>Prediction Results</h3> 
+            <canvas id="predictionChart" width="800" height="400"></canvas> 
+        </div>
+
+    </div>
+
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        {% comment %} console.log(predictionsForChart); {% endcomment %}
+        var dates = [
+        {% for prediction in predictions %}
+            '{{ prediction.date }}',
+        {% endfor %}];
+
+        var predicted_close_price = [
+        {% for prediction in predictions %}
+            {{ prediction.predicted_close_price }}, 
+        {% endfor %}];
+
+        console.log(dates);
+        console.log(predicted_close_price);
+        var ctx = document.getElementById('predictionChart').getContext('2d');
+        var predictionChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Predicted Close Price',
+                    data: predicted_close_price,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    
+                    y: {
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+
+        // Pagination Logic for Detail Table 
+        var detailRows = document.querySelectorAll("#predictionDetailTableBody tr");
+        var rowsPerPageDetail = 10;
+        var currentPageDetail = 1;
+        
+        function renderDetailTable(page) {
+            var start = (page - 1) * rowsPerPageDetail;
+            var end = start + rowsPerPageDetail;
+            detailRows.forEach(function(row, index) {
+                if (index >= start && index < end) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+        
+        function setupPaginationDetail() {
+            var pagination = document.getElementById('paginationDetail');
+            pagination.innerHTML = '';
+            var pageCount = Math.ceil(detailRows.length / rowsPerPageDetail);
+            var createPageItem = function(text, disabled, page) {
+                var li = document.createElement('li');
+                li.className = 'page-item ' + (disabled ? 'disabled' : '');
+                var a = document.createElement('a');
+                a.className = 'page-link';
+                a.innerText = text;
+                if (!disabled) {
+                    a.href = '#';
+                    a.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        currentPageDetail = page;
+                        renderDetailTable(currentPageDetail);
+                        setupPaginationDetail();
+                    });
+                }
+                li.appendChild(a);
+                return li;
+            };
+            pagination.appendChild(createPageItem('« First', currentPageDetail === 1, 1));
+            pagination.appendChild(createPageItem('Previous', currentPageDetail === 1, currentPageDetail - 1));
+            var pageItem = document.createElement('li');
+            pageItem.className = 'page-item active';
+            var span = document.createElement('span');
+            span.className = 'page-link';
+            span.innerText = 'Page ' + currentPageDetail + ' of ' + pageCount;
+            pageItem.appendChild(span);
+            pagination.appendChild(pageItem);
+            pagination.appendChild(createPageItem('Next', currentPageDetail === pageCount, currentPageDetail + 1));
+            pagination.appendChild(createPageItem('Last »', currentPageDetail === pageCount, pageCount));
+        }
+        renderDetailTable(currentPageDetail);
+        setupPaginationDetail();
+    </script>
+    
+</body>
+</html>
